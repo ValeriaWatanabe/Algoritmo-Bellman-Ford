@@ -1,0 +1,92 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/* 
+ * File:   main.c
+ * Author: USER
+ *
+ * Created on 17 de octubre de 2020, 12:13 AM
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
+#define INFINITO 5000
+
+void VectorDistancia(int V, int A, int S, int arcos[A][3])
+{
+    int f, d, peso;
+    int distancia[V];//arreglo de distancias
+    //Inicializacion de distancias con un valor infinito
+    for(int i=0; i<V; i++)
+    {
+        distancia[i] = INFINITO;    
+    }
+    distancia[S] = 0;//la distancia del origen es 0
+    //Relajacion
+    for(int i=1; i<V; i++)
+    {
+        for(int j=0; j<A; j++)
+        {
+            f = arcos[j][0]; 
+            d = arcos[j][1]; 
+            peso = arcos[j][2];
+            
+            if(distancia[f] + peso < distancia[d])
+            {
+                distancia[d] = distancia[f] + peso;//actualizacion de la distancia
+                ImprimirSolucion(distancia, V, S);//Impresion de actualizacion
+            }
+        }
+    }    
+    //busqueda de ciclos negativos
+    for(int k=0;k<A;k++)
+    {
+        f = arcos[k][0] , d = arcos[k][1] ; peso = arcos[k][2];
+        if(distancia[f]+ peso < distancia[d])
+        {
+            printf("Existen ciclos de peso negativo");
+        }       
+    }
+    printf("\nResultado final: ");
+    ImprimirSolucion(distancia, V, S);//Impreión del resultado final (caminos más cortos)
+}
+
+void ImprimirSolucion(int distancia[],int V, int S)//funcion de impresión de la tabla
+{
+    printf("\nNodo\tDistancia desde nodo %d \n",S);
+    for(int i=0; i<V; i++)
+    {
+        printf("%d\t%d\n",i,distancia[i]);
+    }
+    return;
+}
+
+int main() 
+{
+    //se lee el archivo el cual contiene la informacion del grafo
+    //depende de que topología se analize, se lee un archivo diferente
+    FILE *archivo = fopen("C:\\Users\\USER\\Documents\\Redes Compu\\Trabajo Integrador\\complejo.txt","r");
+    int V, A, S; //V = nodos, A = arcos, S = origen
+    
+    fscanf(archivo,"%d", &V);//lee el primer numero del archivo que se refiere a la cantidad de vértices
+    fscanf(archivo,"%d", &A);//lee el segundo numero del archivo que se refiere a la cantidad de aristas
+    fscanf(archivo,"%d", &S);//lee el tercer numero del archivo que se refiere al nodo fuente
+    //Matriz de aristas del grafo, filas = a la cantidad de aristas, columnas = origen, destino, peso
+    int arcos[A][3];
+    //Se procede a llenar la matriz
+    for(int i=0; i<A; i++)
+    {
+        fscanf(archivo,"%d", &arcos[i][0]);//origen
+        fscanf(archivo,"%d", &arcos[i][1]);//destino
+        fscanf(archivo,"%d", &arcos[i][2]);//peso
+    }
+    //se llama al algoritmo de bellman-ford
+    VectorDistancia(V, A, S, arcos);
+    fclose(archivo);//cierre del archivo
+    return (EXIT_SUCCESS);
+}
